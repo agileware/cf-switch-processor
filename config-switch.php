@@ -1,3 +1,1 @@
-<?php
-
-print \Caldera_Forms_Processor_UI::config_fields( CF_Switch\switch_fields() );
+<p class="description">This Processor has no configuration options.  It should only be used once per form, and produces a magic tag for each labelled switch.</p>

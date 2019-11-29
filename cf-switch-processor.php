@@ -17,7 +17,7 @@
 
 /**
  * Plugin Name: Caldera Forms Switch Processor
- * Description: Caldera Forms Processor to generate a magic tag value based on input conditions
+ * Description: A Caldera Forms Processor to generate magic tag values based on input conditions
  * Version: 1.0.0
  * Author: Agileware
  * Author URI: https://agileware.com.au
@@ -33,7 +33,7 @@ namespace CF_Switch;
 function register ( $processors ) {
 	$processors['case'] = [
 		'name' => __( 'Switch: Case', 'cf-switch-processor' ),
-		'description' => __( 'Generate a magic tag value based on input conditions', 'cf-switch-processor' ),
+		'description' => __( 'Generate a value based on input conditions.', 'cf-switch-processor' ),
 		'author' => 'Agileware',
 		'template' => \plugin_dir_path( __FILE__ ) . '/config-case.php',
 		'processor' => 'CF_Switch\sw_case',
@@ -41,7 +41,7 @@ function register ( $processors ) {
 
 	$processors['switch'] = [
 		'name' => __( 'Switch: Results', 'cf-switch-processor' ),
-		'description' => __( 'Generate a magic tag value based on input conditions', 'cf-switch-processor' ),
+		'description' => __( 'Collect the values from previous Case processors and output as magic tags.', 'cf-switch-processor' ),
 		'author' => 'Agileware',
 		'template' => \plugin_dir_path( __FILE__ ) . '/config-switch.php',
 		'processor' => 'CF_Switch\sw_switch',
@@ -81,19 +81,16 @@ function case_fields () {
 			'type'		=> 'text',
 			'required'	=> true,
 			'magic'		=> false,
-			'label'		=> 'Switch Label',
+			'label'		=> __( 'Switch Label', 'cf-switch-processor' ),
+			'desc'		=> __('Provide a label for the switch this case applies to. This determines the magic tag.  For example, if you enter ‘value’ here, the resulting tag will be ‘{switch:value}’', 'cf-switch-processor' ),
 		],
 		[	'id'		=> 'output',
 			'type'		=> 'text',
 			'required'	=> true,
 			'magic'		=> true,
-			'label'		=> 'Output Value',
+			'label'		=> __( 'Output', 'cf-switch-processor' ),
+			'desc'		=> __( 'The value to output in the magic tag.', 'cf-switch-processor' ),
 		]
-	];
-}
-
-function switch_fields () {
-	return [
 	];
 }
 
