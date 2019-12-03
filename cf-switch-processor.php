@@ -30,51 +30,70 @@
 
 namespace CF_Switch;
 
+/**
+ * Calback to register the processors with Caldera Forms.
+ */
 function register ( $processors ) {
+	/* Switch: Case – the condition / result pair. */
 	$processors['case'] = [
 		'name' => __( 'Switch: Case', 'cf-switch-processor' ),
 		'description' => __( 'Generate a value based on input conditions.', 'cf-switch-processor' ),
 		'author' => 'Agileware',
 		'template' => \plugin_dir_path( __FILE__ ) . '/config-case.php',
-		'processor' => 'CF_Switch\sw_case',
+		'pre_processor' => 'CF_Switch\sw_case',
 	];
 
+	/* Switch: Results – used after each case to push the results into a meta tag. */
 	$processors['switch'] = [
 		'name' => __( 'Switch: Results', 'cf-switch-processor' ),
 		'description' => __( 'Collect the values from previous Case processors and output as magic tags.', 'cf-switch-processor' ),
 		'author' => 'Agileware',
 		'template' => \plugin_dir_path( __FILE__ ) . '/config-switch.php',
-		'processor' => 'CF_Switch\sw_switch',
-		'magic_tags' => [
-			'*'
-		],
+		'pre_processor' => 'CF_Switch\sw_switch',
+		'magic_tags' => [ '*' ],
 	];
 
 	return $processors;
 }
 
+/**
+ * Static function to store and retrieve results.
+ */
 function &results() {
 	static $results = [];
 
 	return $results;
 }
 
+/**
+ * Switch: Case preprocessor.
+ */
 function sw_case ( $config, $form ) {
 	$results =& results();
 
+	// Get the already known data.
 	$data = new \Caldera_Forms_Processor_Get_Data( $config, $form, case_fields() );
 
+	// Label for the switch this case applies to.
 	$id = $data->get_value('sw_id');
-	
+
+	// Set the output of the labelled switch.  Magic tags should be already applied.
 	$results[$id] = $data->get_value('output');
 }
 
+/**
+ * Switch: Result preprocessor.
+ */
 function sw_switch ( $config, $form ) {
-	$data = new \Caldera_Forms_Processor_Get_Data( $config, $form, switch_fields() );
-
-	return results();
+	// Loop through the stored results and set the magic tags from the output.
+	foreach(results() as $metakey => $metavalue) {
+		\Caldera_Forms::set_submission_meta($metakey, $metavalue, $form, $config['processor_id']);
+	}
 }
 
+/**
+ * Fields used for configuring the Switch: Case processor.
+ */
 function case_fields () {
 	return [
 		[	'id'		=> 'sw_id',
@@ -82,7 +101,7 @@ function case_fields () {
 			'required'	=> true,
 			'magic'		=> false,
 			'label'		=> __( 'Switch Label', 'cf-switch-processor' ),
-			'desc'		=> __('Provide a label for the switch this case applies to. This determines the magic tag.  For example, if you enter ‘value’ here, the resulting tag will be ‘{switch:value}’', 'cf-switch-processor' ),
+			'desc'		=> __('Provide a label for the switch this case applies to. This determines the magic tag.	For example, if you enter ‘value’ here, the resulting tag will be ‘{switch:value}’', 'cf-switch-processor' ),
 		],
 		[	'id'		=> 'output',
 			'type'		=> 'text',
@@ -94,4 +113,5 @@ function case_fields () {
 	];
 }
 
+// Add our register callback to Caldera Forms.
 \add_filter( 'caldera_forms_get_form_processors', 'CF_Switch\register' );
