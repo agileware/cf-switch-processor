@@ -57,6 +57,31 @@ function register ( $processors ) {
 }
 
 /**
+ * Callback to alter the magic tags available for selection.
+ * Forces all the known switch labels to be shown as a separate magic tag.
+ */
+function magic_tags( $tags, $elementID ) {
+	// Get the form from the passed ID
+	$element = \Caldera_Forms_Forms::get_form( $elementID );
+
+	// Keep default tag list.
+	$labels = [ 'switch:*' => true ];
+
+	// Loop through all the configured case processors
+	foreach ($element['processors'] as $processor) {
+		if (($processor['type'] == 'case') && !empty($processor['config']['sw_id'])) {
+			// Expose the magic tag for this case processor's label.
+			$labels['switch:' . $processor['config']['sw_id']] = true;
+		}
+	}
+
+	// Update the tag list for switch processors.
+	$tags['switch']['tags'] = array_keys($labels);
+
+	return $tags;
+}
+
+/**
  * Static function to store and retrieve results.
  */
 function &results() {
@@ -101,7 +126,7 @@ function case_fields () {
 			'required'	=> true,
 			'magic'		=> false,
 			'label'		=> __( 'Switch Label', 'cf-switch-processor' ),
-			'desc'		=> __('Provide a label for the switch this case applies to. This determines the magic tag.	For example, if you enter ‘value’ here, the resulting tag will be ‘{switch:value}’', 'cf-switch-processor' ),
+			'desc'		=> __('Provide a label for the switch this case applies to. This determines the magic tag. For example, if you enter ‘value’ here, the resulting tag will be ‘{switch:value}’', 'cf-switch-processor' ),
 		],
 		[	'id'		=> 'output',
 			'type'		=> 'text',
@@ -115,3 +140,5 @@ function case_fields () {
 
 // Add our register callback to Caldera Forms.
 \add_filter( 'caldera_forms_get_form_processors', 'CF_Switch\register' );
+
+\add_filter( 'caldera_forms_get_magic_tags', 'CF_Switch\magic_tags', 10, 2 );
